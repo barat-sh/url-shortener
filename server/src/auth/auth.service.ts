@@ -53,6 +53,11 @@ export class AuthService {
         }        
     }
 
+    async logout(res: Response) {
+        res.clearCookie('token')
+        res.json({message: "User logged out..."})
+    }
+
     async signJwtToken(asrgs: {id: string}){
         const payload = asrgs;
         return this.jwt.sign(payload, {secret: jwt_secret});
