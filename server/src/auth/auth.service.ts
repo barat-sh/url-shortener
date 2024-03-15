@@ -1,22 +1,18 @@
 /* eslint-disable prettier/prettier */
-import { Injectable } from '@nestjs/common';
-import { SignupDto } from './dto/auth.dto';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { LoginDto, SignupDto } from './dto/auth.dto';
 import { PrismaService } from 'prisma/prisma.service';
 import * as bcrypt from 'bcrypt';
+import { JwtService } from '@nestjs/jwt';
+import { jwt_secret } from 'src/utils/constants';
+import { Response } from 'express';
 
 @Injectable()
 export class AuthService {
-    constructor(private prisma: PrismaService) {}
+    constructor(private prisma: PrismaService, private jwt: JwtService) {}
 
-    async signup(dto: SignupDto) {
+    async signup(dto: SignupDto, res: Response) {
         const {email, password, firstname, lastname} = dto
-        // const newUser = {
-        //     email: email,
-        //     password: password,
-        //     firstname: firstname,
-        //     lastname: lastname
-        // };
-
         const hashedPassword = await bcrypt.hash(password, 10);
 
         try{
@@ -28,16 +24,37 @@ export class AuthService {
                     passwors: hashedPassword
                 }
             })
-            return 'User created'
+            res.json({message: 'User created'})
         }catch(err) {
-            return `Email already exists.. -> ${err}`
+            res.send(`Email already exists.. -> ${err}`)
         }
     }
-    async login() {
-        return 'login succed'
+    async login(dto: LoginDto, res: Response) {
+        const {email, password} = dto;
+        const userExists = await this.prisma.user.findUnique({ where: { email }});
+        if (!userExists) {
+            res.json({message: `User doesnot exists...`})
+        }
+        const comparedPassword = await bcrypt.compare(password, userExists.passwors);
+
+        if (!comparedPassword) {
+            throw new UnauthorizedException();
+        }
+        try{
+            const token = await this.signJwtToken({
+                id: userExists.id.toString()
+            });
+            
+            res.cookie('token', token);
+
+            res.json({message: `user logged in successfully...`})
+        }catch(err) {
+            res.json({message: 'Error while logging in...'})
+        }        
     }
 
-    async logout() {
-        return 'logout route'
+    async signJwtToken(asrgs: {id: string}){
+        const payload = asrgs;
+        return this.jwt.sign(payload, {secret: jwt_secret});
     }
 }
