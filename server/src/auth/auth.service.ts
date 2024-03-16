@@ -47,7 +47,7 @@ export class AuthService {
             
             res.cookie('token', token);
 
-            res.json({message: `user logged in successfully...`})
+            res.json({message: `user logged in successfully...`, userExists})
         }catch(err) {
             res.json({message: 'Error while logging in...'})
         }        
