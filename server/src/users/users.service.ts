@@ -26,7 +26,6 @@ export class UsersService {
       });
       if (!currentUser) {
         res.send('Error while fetching user data...');
-        res.end();
       }
       res.send(currentUser);
     } catch (err) {

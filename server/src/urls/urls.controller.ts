@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import {
   Controller,
   Get,
@@ -16,7 +17,7 @@ import { LongUrl } from './dto/url.dto';
 export class UrlsController {
   constructor(private readonly urlsService: UrlsService) {}
 
-  @Get('api/getUrl/:urlid')
+  @Get('getUrl/:urlid')
   getUrl(
     @Param() params: { urlid: string },
     @Req() req,
@@ -25,7 +26,7 @@ export class UrlsController {
     return this.urlsService.getUrl(req, res, params.urlid);
   }
 
-  @UseGuards(JwtAuthGuard)
+  // @UseGuards(JwtAuthGuard)
   @Get('api/getAllUrls/:id')
   getAllUrls(
     @Param() params: { id: string },
