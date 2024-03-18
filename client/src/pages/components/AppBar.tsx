@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import * as React from 'react';
 import { Box } from '@mui/material';
 import AppBar from '@mui/material/AppBar';
@@ -11,6 +12,7 @@ import Drawer from '@mui/material/Drawer';
 import MenuIcon from '@mui/icons-material/Menu';
 import GitHubIcon from '@mui/icons-material/GitHub';
 import axios from 'axios';
+import { useParams } from 'react-router-dom';
 
 const logoStyle = {
   width: '40px',
@@ -19,7 +21,9 @@ const logoStyle = {
 };
 
 function Appbar() {
+  const {id} = useParams();
   const [open, setOpen] = React.useState(false);
+  const [email, setEmail] = React.useState("");
 
   const toggleDrawer = (newOpen: boolean) => () => {
     setOpen(newOpen);
@@ -48,6 +52,18 @@ function Appbar() {
       window.location.href = "http://localhost:5173/login"
     }
   }
+
+  React.useEffect(()=>{
+    const url = `http://localhost:3005/users//api/${id}`;
+    const fetchData = async()=> {
+      const response = await axios(url);
+      if (response.status) {
+        setEmail(response.data.email)
+      }
+
+    }
+    fetchData();
+  }, [])
 
   return (
     <div>
@@ -143,6 +159,7 @@ function Appbar() {
                 alignItems: 'center',
               }}
             >
+              <Typography>{email}</Typography>
               <Button
                 color="success"
                 variant="contained"

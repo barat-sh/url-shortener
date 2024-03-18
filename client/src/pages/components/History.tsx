@@ -13,35 +13,25 @@ import axios from 'axios';
 
 export default function History() {
     const { id } = useParams();
-    // const [ urls, setUrls ] = useState([]);
+    const [ urls, setUrls ] = useState([]);
 
+    useEffect(()=>{
+      const fetchData = async() => {
+        const url = "http://localhost:3005/urls/api/getAllUrls/f9d86b39-8e2a-4e80-983a-afc520258198"
+        try {
+          const response = await axios.get(url);
+          console.log(response.data);
+          setUrls(response.data?.urls);
+        } catch (error) {
+          console.error("Error fetching data:", error);
+        }
+      }
+      fetchData()
+    },[])
 
-    const handleGenerate = async () => {
-        console.log("shortURL")
+    const handleClick = () => {
+      console.log(urls)
     }
-
-    useEffect(() => {
-        const url = `http://localhost:3005/urls/api/getAllUrls/${id}`;
-        const fetchData = async () => {
-            try {
-              const token = document.cookie.split(';').find(cookie => cookie.trim().startsWith('token'));
-              if (token){
-                  const authToken = token.split('=')[1];
-                  const response = await axios.get(url, {
-                    headers: {
-                      Authorization: `Bearer ${authToken}`
-                    }
-                  });
-                  console.log(response.data);
-              }
-              console.log("could not found token")
-          } catch (error) {
-            console.error('Error fetching data:', error);
-          }
-        };
-    
-        fetchData(); // Call the async function immediately
-      }, []);
 
   return (
     <Box
@@ -99,19 +89,13 @@ export default function History() {
                     </TableRow>
                     </TableHead>
                     <TableBody>
-                    {/* Example rows */}
                     <TableRow>
                         <TableCell>Row 1, Col 1</TableCell>
                         <TableCell>Row 1, Col 2</TableCell>
                         <TableCell>Row 1, Col 3</TableCell>
                         <TableCell>Row 1, Col 4</TableCell>
                     </TableRow>
-                    <TableRow>
-                        <TableCell>Row 2, Col 1</TableCell>
-                        <TableCell>Row 2, Col 2</TableCell>
-                        <TableCell>Row 2, Col 3</TableCell>
-                        <TableCell>Row 2, Col 4</TableCell>
-                    </TableRow>
+
                     {/* Add more rows as needed */}
                     </TableBody>
                 </Table>
@@ -123,15 +107,7 @@ export default function History() {
             useFlexGap
             sx={{ pt: 2, width: { xs: '100%', sm: 'auto' } }}
           >
-            <TextField
-              id="outlined-basic"
-              hiddenLabel
-              size="small"
-              variant="outlined"
-              aria-label="Enter your long url"
-              placeholder="Your long URL"
-            />
-            <Button variant="contained" color="primary" onClick={handleGenerate}>
+            <Button variant="contained" color="primary" onClick={handleClick}>
               Generate
             </Button>
           </Stack>
