@@ -1,5 +1,5 @@
 import * as React from 'react';
-import Box from '@mui/material/Box';
+import { Box } from '@mui/material';
 import AppBar from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
 import Button from '@mui/material/Button';
@@ -70,7 +70,7 @@ function Appbar() {
               flexShrink: 0,
               borderRadius: '999px',
               bgcolor:
-                theme.palette.mode === 'dark'
+                theme.palette.mode === 'light'
                   ? 'rgba(255, 255, 255, 0.4)'
                   : 'rgba(0, 0, 0, 0.4)',
               backdropFilter: 'blur(24px)',

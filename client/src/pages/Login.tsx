@@ -43,14 +43,13 @@ export default function Login() {
         password: password
     }
     const response = await axios.post(loginUrl, postData);
-    console.log('Response from server:', response.data);
-    if (response.status == 200) {
-      const userId = response.data && response.data.userExists ? response.data.userExists.id : null;
-      window.location.href = `http://localhost:5173/dashboard/${userId}`;
-    }
-    const userId = response.data && response.data.userExists ? response.data.userExists.id : null;
-    window.location.href = `http://localhost:5173/dashboard/${userId}`;
-
+    console.log('Response from server:', response.headers["auth-token"]);
+    // if (response.status == 200) {
+    //   const userId = response.data && response.data.userExists ? response.data.userExists.id : null;
+    //   window.location.href = `http://localhost:5173/dashboard/${userId}`;
+    // }
+    // const userId = response.data && response.data.userExists ? response.data.userExists.id : null;
+    // window.location.href = `http://localhost:5173/dashboard/${userId}`;
   };
 
   return (

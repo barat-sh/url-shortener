@@ -6,39 +6,42 @@ import Link from '@mui/material/Link';
 import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
+import { Table, TableHead, TableBody, TableRow, TableCell, Paper } from '@mui/material';
 import axios from 'axios';
 
-export default function Hero() {
+export default function History() {
     const { id } = useParams();
-    const [ longURL, setLongURL ] = useState("");
-    const [ shortURL, setShortURL ] = useState("");
-    const [ anchor, setAnchor ] = useState(false);
+    // const [ urls, setUrls ] = useState([]);
+
 
     const handleGenerate = async () => {
-        const url = `http://localhost:3005/urls/api/shortUrl/${id}`;
-        if (longURL !== " " && longURL !== "" && longURL.length > 4){
-            const response = await axios.post(url, { LongUrl: longURL });
-            // console.log('Response from server:', response.data);
-
-            if (response.status == 200 && response.data?.shortenedUrl) {
-                setAnchor(true);
-                setShortURL(response.data?.shortenedUrl)
-            }
-        }
-        console.log(shortURL)
+        console.log("shortURL")
     }
 
-    const copyToClipboard = () => {
-        navigator.clipboard.writeText(shortURL)
-          .then(() => {
-            console.log("Text copied to clipboard: " + shortURL);
-          })
-          .catch(err => {
-            console.error('Failed to copy: ', err);
-          });
-    };
+    useEffect(() => {
+        const url = `http://localhost:3005/urls/api/getAllUrls/${id}`;
+        const fetchData = async () => {
+            try {
+              const token = document.cookie.split(';').find(cookie => cookie.trim().startsWith('token'));
+              if (token){
+                  const authToken = token.split('=')[1];
+                  const response = await axios.get(url, {
+                    headers: {
+                      Authorization: `Bearer ${authToken}`
+                    }
+                  });
+                  console.log(response.data);
+              }
+              console.log("could not found token")
+          } catch (error) {
+            console.error('Error fetching data:', error);
+          }
+        };
+    
+        fetchData(); // Call the async function immediately
+      }, []);
 
   return (
     <Box
@@ -65,7 +68,7 @@ export default function Hero() {
         <Stack spacing={2} useFlexGap sx={{ width: { xs: '100%', sm: '70%' } }}>
           <Typography
             component="h1"
-            variant="h1"
+            variant="h4"
             sx={{
               display: 'flex',
               flexDirection: { xs: 'column', md: 'row' },
@@ -73,23 +76,46 @@ export default function Hero() {
               textAlign: 'center',
             }}
           >
-            Our latest&nbsp;
+            All of your&nbsp;
             <Typography
               component="span"
-              variant="h1"
+              variant="h4"
               sx={{
                 color: (theme) =>
                   theme.palette.mode === 'light' ? 'primary.main' : 'primary.light',
               }}
             >
-              products
+              URL Collections
             </Typography>
           </Typography>
-          <Typography variant="body1" textAlign="center" color="text.secondary">
-            Explore our cutting-edge dashboard, delivering high-quality solutions
-            tailored to your needs. <br />
-            Elevate your experience with top-tier features and services.
-          </Typography>
+            <Paper>
+                <Table>
+                    <TableHead>
+                    <TableRow>
+                        <TableCell>ShortURL</TableCell>
+                        <TableCell>LongURL</TableCell>
+                        <TableCell>CreatedDate</TableCell>
+                        <TableCell>Column 4</TableCell>
+                    </TableRow>
+                    </TableHead>
+                    <TableBody>
+                    {/* Example rows */}
+                    <TableRow>
+                        <TableCell>Row 1, Col 1</TableCell>
+                        <TableCell>Row 1, Col 2</TableCell>
+                        <TableCell>Row 1, Col 3</TableCell>
+                        <TableCell>Row 1, Col 4</TableCell>
+                    </TableRow>
+                    <TableRow>
+                        <TableCell>Row 2, Col 1</TableCell>
+                        <TableCell>Row 2, Col 2</TableCell>
+                        <TableCell>Row 2, Col 3</TableCell>
+                        <TableCell>Row 2, Col 4</TableCell>
+                    </TableRow>
+                    {/* Add more rows as needed */}
+                    </TableBody>
+                </Table>
+            </Paper>
           <Stack
             direction={{ xs: 'column', sm: 'row' }}
             alignSelf="center"
@@ -104,20 +130,11 @@ export default function Hero() {
               variant="outlined"
               aria-label="Enter your long url"
               placeholder="Your long URL"
-              onChange={(event)=>{setLongURL(event.target.value)}}
             />
             <Button variant="contained" color="primary" onClick={handleGenerate}>
               Generate
             </Button>
           </Stack>
-          <Box>
-            {anchor ? (
-                <Box display={"flex"} mt={2} justifyContent={"center"}>
-                    <LongURLBox shortURL = {shortURL} />
-                    <Button size='small' variant='outlined' style = {{color: "#9e9e9e"}} onClick={copyToClipboard}>copy</Button>
-                </Box>
-            ) : null}
-          </Box>
           <Typography variant="caption" textAlign="center" sx={{ opacity: 0.8 }}>
             By clicking &quot;Start now&quot; you agree to our&nbsp;
             <Link href="#" color="primary">
@@ -130,23 +147,3 @@ export default function Hero() {
     </Box>
   );
 }
-
-interface LongURLBoxProps {
-    shortURL: string;
-}
-
-const LongURLBox = (props: LongURLBoxProps) => {
-    return (
-        <Box width={'10rem'} display={'flex'}>
-            <TextField
-              id="outlined-basic"
-              hiddenLabel
-              size="small"
-              variant="outlined"
-              aria-label="Enter your long url"
-              placeholder="Your long URL"
-              value={props.shortURL}
-            />
-        </Box>
-    );
-};

@@ -16,6 +16,15 @@ import { LongUrl } from './dto/url.dto';
 export class UrlsController {
   constructor(private readonly urlsService: UrlsService) {}
 
+  @Get('api/getUrl/:urlid')
+  getUrl(
+    @Param() params: { urlid: string },
+    @Req() req,
+    @Res({ passthrough: true }) res,
+  ) {
+    return this.urlsService.getUrl(req, res, params.urlid);
+  }
+
   @UseGuards(JwtAuthGuard)
   @Get('api/getAllUrls/:id')
   getAllUrls(
@@ -34,15 +43,6 @@ export class UrlsController {
     @Res({ passthrough: true }) res,
   ) {
     return this.urlsService.shortUrl(longUrl, req, res, params.id);
-  }
-
-  @Get('api/getUrl/:urlid')
-  getUrl(
-    @Param() params: { urlid: string },
-    @Req() req,
-    @Res({ passthrough: true }) res,
-  ) {
-    return this.urlsService.getUrl(req, res, params.urlid);
   }
 }
 
