@@ -1,12 +1,16 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { PrismaService } from 'prisma/prisma.service';
 import { LongUrl } from './dto/url.dto';
 import * as shortid from 'shortid';
+import { Cache } from 'cache-manager';
 
 @Injectable()
 export class UrlsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    @Inject('CACHE_MANAGER') private cacheManager: Cache,
+    private prisma: PrismaService,
+  ) {}
 
   async getAllUrls(req: Request, res: Response, id: string) {
     const decodedUser = req.user as { id: string };
@@ -27,7 +31,7 @@ export class UrlsService {
   async shortUrl(dto: LongUrl, req: Request, res: Response, id: string) {
     const { LongUrl } = dto;
     const shortId = shortid.generate().substr(0, 5);
-    const shortenedUrl = `http://localhost:3000/${shortId}`;
+    const shortenedUrl = `http://localhost:3005/${shortId}`;
     try {
       const newUrl = await this.prisma.urls.create({
         data: {
@@ -36,11 +40,9 @@ export class UrlsService {
           createrId: id,
         },
       });
-      const data = {
-        newUrl: newUrl,
-        shortenedUrl: shortenedUrl,
-      };
-      res.status(200).json({ message: 'Url created', data });
+      const data = newUrl;
+      await this.cacheManager.set(shortId, newUrl.longUrl);
+      res.status(200).json({ message: 'Url created', data, shortenedUrl });
     } catch (err) {
       res.status(400).json({ message: 'Error while creating url...' });
     }
@@ -48,6 +50,12 @@ export class UrlsService {
 
   async getUrl(req: Request, res: Response, urlid: string) {
     try {
+      const cashedData = await this.cacheManager.get(urlid);
+      if (cashedData) {
+        console.log(cashedData);
+        res.status(301).json({ longUrl: cashedData });
+        return;
+      }
       const data = await this.prisma.urls.findFirst({
         where: { shortUrl: urlid },
         select: {
@@ -57,7 +65,8 @@ export class UrlsService {
           createrId: true,
         },
       });
-      res.status(200).json({ menubar: 'Found URL', data });
+      await this.cacheManager.set(urlid, data.longUrl);
+      res.status(200).json({ menubar: 'Found URL', LongUrl: data.longUrl });
     } catch (err) {
       res.status(400).json({ message: 'Error while finding Url' });
     }
