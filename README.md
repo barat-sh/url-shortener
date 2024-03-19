@@ -1,7 +1,6 @@
 URL Shortener
 
-![Uploading image.png…]()
-
+<img src="./sysarc.png" />
 
 -> clone project
 git clone ______________

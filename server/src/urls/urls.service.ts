@@ -35,7 +35,7 @@ export class UrlsService {
   async shortUrl(dto: LongUrl, req: Request, res: Response, id: string) {
     const { LongUrl } = dto;
     const shortId = shortid.generate().substr(0, 5);
-    const shortenedUrl = `http://localhost:3005/${shortId}`;
+    const shortenedUrl = `http://localhost:3005/urls/getUrl/${shortId}`;
     try {
       const newUrl = await this.prisma.urls.create({
         data: {
